@@ -41,7 +41,7 @@ jieba.load_userdict('C:/users/CNU074VP/dict_out.csv')
 
 #word segmentation with jieba
 comment_s = []
-pattern = re.compile(r'[^\u4e00-\u9fa5]')
+pattern = re.compile(r'[^\u4e00-\u9fa5]')  #Use regular expression to remove non-Chinese characters
 for line in comment:
     line.replace(' ','')
     re.sub(pattern, '', line)
