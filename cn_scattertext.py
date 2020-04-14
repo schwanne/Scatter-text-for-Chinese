@@ -80,6 +80,8 @@ df = pd.concat([original_data, cleaned_texts],  axis=1)
 
 df['parsed_text'] = df['parsed_text'].apply(chinese_nlp)
 
+df['text'] = df['text'].apply(chinese_nlp)
+
 corpus = CorpusFromParsedDocuments(df,
                                    category_col='file_name',
                                    parsed_col='parsed_text').build()
