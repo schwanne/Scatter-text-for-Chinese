@@ -33,6 +33,10 @@ file_data = (pd.DataFrame.from_dict(file_name_and_text, orient='index')
 
 df = file_data
 
+for i in np.arange(len(df)):
+    df['text'][i] = "\n".join(list(dict.fromkeys(df['text'][i].split("\n"))))   #Remove duplicates
+    
+
 
 comment = df.text.values.tolist() 
 
@@ -41,10 +45,13 @@ jieba.load_userdict('C:/users/CNU074VP/dict_out.csv')
 
 #word segmentation with jieba
 comment_s = []
-pattern = re.compile(r'[^\u4e00-\u9fa5]')  #Use regular expression to remove non-Chinese characters
+# pattern = re.compile(r'[\u4e00-\u9fa5]+')   #Get rid of non-Chinese string, need to keep 换行符\n
+
+pattern = re.compile('\<.*?\>')  #match the unicode content inside <> with regular expression
 for line in comment:
     line.replace(' ','')
-    re.sub(pattern, '', line)
+    # line = ''.join(re.findall(pattern, line))
+    line = ''.join(re.sub(pattern, '', line))
     comment_cut = jieba.lcut(line)
     comment_s.append(comment_cut)  
 
@@ -66,12 +73,13 @@ def get_single_doc(num):
     for i in np.arange(len(comment_clean[num])):
         comment_doc = ' '.join([str(item) for item in comment_clean[num]])
     return comment_doc
-        
-        
-doc1 = pd.Series(get_single_doc(0))
-doc2 = pd.Series(get_single_doc(1))
+      
+    
+l_series = []
+for i in np.arange(len(df)):
+    l_series.append(pd.Series(get_single_doc(i)))
+    
 
-l_series = [doc1, doc2]
 cleaned_texts = pd.concat(l_series, ignore_index=True).to_frame().rename(columns = {0 : "parsed_text"}).reset_index(drop=True)
 
 original_data = df.reset_index(drop=True)
@@ -80,20 +88,23 @@ df = pd.concat([original_data, cleaned_texts],  axis=1)
 
 df['parsed_text'] = df['parsed_text'].apply(chinese_nlp)
 
+for i in np.arange(len(df['text'])):
+    df['text'][i] = re.sub(pattern, '', df['text'][i])
+    
+
 df['text'] = df['text'].apply(chinese_nlp)
 
 corpus = CorpusFromParsedDocuments(df,
                                    category_col='file_name',
                                    parsed_col='parsed_text').build()
+
 html = produce_scattertext_explorer(corpus,
                                     category='安利蛋白粉评论.txt',
                                     category_name='安利蛋白粉评论.txt',
-	                                not_category_name='汤臣倍健蛋白粉评论.txt',
-	                                width_in_pixels=1000,
-	                                metadata=df['file_name'],                                 
-	                                asian_mode=True,
+	                            not_category_name='汤臣倍健蛋白粉评论.txt',
+	                            width_in_pixels=1000,
+	                            metadata=df['file_name'],                                 
+	                            asian_mode=True,
                                     alternative_text_field = "text")
 open('C:/Users/CNU074VP/Desktop/Chinese Topic Model/protein_review_compare.html', 'w', encoding='utf-8').write(html)
 print('Open C:/Users/CNU074VP/Desktop/Chinese Topic Model in Chrome or Firefox.')
-
-
