@@ -20,13 +20,13 @@ sys.path.append(os.path.abspath("./utils"))
 from dash_helper import get_scattertext_html
 
 from flask import Flask, render_template
-app_flask = Flask(__name__)
+#app_flask = Flask(__name__)
 
-app_dash = dash.Dash(__name__)
+app = dash.Dash(__name__)
 
-# server = app.server
+server = app.server
 
-app_dash.layout = html.Div(
+app.layout = html.Div(
     style={"height": "100%"},
     children=[
         # Banner display
@@ -89,14 +89,14 @@ app_dash.layout = html.Div(
 
 
 
-@app_flask.route("/")
+@server.route("/")
 def index():
     get_scattertext_html()        
     return render_template("protein_review_compare.html")
 
 
 if __name__ == '__main__':
-    app_flask.run(debug = True, use_reloader = False)
+    app.run(debug = True, use_reloader = False)
     
     
     
